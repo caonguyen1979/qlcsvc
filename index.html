@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QLCSVC - Quản lý cơ sở vật chất</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-icon">🏫</span>
+        <div>
+          <h1>QLCSVC</h1>
+          <p>Quản lý cơ sở vật chất trường THPT</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="ghost" id="switchTheme">🌗</button>
+        <button class="ghost" id="logoutBtn">Đăng xuất</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="login" id="loginSection">
+        <div class="login-card">
+          <h2>Đăng nhập hệ thống</h2>
+          <p class="muted">Vui lòng đăng nhập để truy cập dữ liệu và phân quyền.</p>
+          <form id="loginForm">
+            <label>
+              Email
+              <input type="email" id="email" placeholder="name@school.edu" required />
+            </label>
+            <label>
+              Mật khẩu
+              <input type="password" id="password" placeholder="••••••••" required />
+            </label>
+            <label class="row">
+              <input type="checkbox" id="remember" />
+              Ghi nhớ đăng nhập trong 3 ngày
+            </label>
+            <label class="row">
+              <input type="checkbox" id="savePassword" />
+              Lưu mật khẩu trên thiết bị
+            </label>
+            <button type="submit" class="primary">Đăng nhập</button>
+            <button type="button" class="link" id="forgotBtn">Quên mật khẩu?</button>
+          </form>
+          <div class="login-note">
+            <strong>Lưu ý:</strong> Không có đăng ký mới. Tài khoản chỉ do quản trị viên cấp.
+          </div>
+        </div>
+        <div class="login-preview">
+          <h3>Quy trình quản lý thiết bị khoa học</h3>
+          <ul>
+            <li>Quét QR để truy cập nhanh hồ sơ thiết bị.</li>
+            <li>Ghi nhận báo hỏng, sửa chữa, điều chuyển dễ dàng.</li>
+            <li>Phân quyền theo vai trò: admin, manager, người sử dụng.</li>
+          </ul>
+          <div class="login-metric">
+            <div>
+              <h4>325+</h4>
+              <p>Thiết bị đang quản lý</p>
+            </div>
+            <div>
+              <h4>98%</h4>
+              <p>Phản hồi xử lý nhanh</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="dashboard hidden" id="dashboardSection">
+        <aside class="sidebar">
+          <div class="profile">
+            <div class="avatar">QL</div>
+            <div>
+              <h4 id="profileName">Nguyễn Văn A</h4>
+              <p id="profileRole">Admin</p>
+            </div>
+          </div>
+          <nav>
+            <button class="nav-item active" data-tab="overview">Tổng quan</button>
+            <button class="nav-item" data-tab="devices">Thiết bị</button>
+            <button class="nav-item" data-tab="reports">Báo hỏng</button>
+            <button class="nav-item" data-tab="users">Người dùng</button>
+            <button class="nav-item" data-tab="settings">Cấu hình</button>
+          </nav>
+        </aside>
+
+        <div class="content">
+          <section class="tab active" id="overview">
+            <div class="grid">
+              <div class="card">
+                <h3>Tình trạng thiết bị</h3>
+                <div class="status-grid">
+                  <div>
+                    <h4>265</h4>
+                    <p>Hoạt động tốt</p>
+                  </div>
+                  <div>
+                    <h4>23</h4>
+                    <p>Đang sửa chữa</p>
+                  </div>
+                  <div>
+                    <h4>12</h4>
+                    <p>Báo hỏng</p>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <h3>Lịch sử cập nhật gần nhất</h3>
+                <ul class="timeline">
+                  <li><span>10:05</span> Điều chuyển máy chiếu PJS-008 sang lớp 12A1.</li>
+                  <li><span>09:30</span> Duyệt báo hỏng máy tính LAB-122.</li>
+                  <li><span>08:45</span> Thêm mới thiết bị âm thanh AUD-054.</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>Quét QR</h3>
+                <p>Quét QR để truy cập nhanh hồ sơ thiết bị.</p>
+                <div class="qr-preview" id="qrPreview"></div>
+                <button class="secondary" id="printQr">Xuất/ In QR</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="tab" id="devices">
+            <div class="section-header">
+              <div>
+                <h2>Danh mục thiết bị</h2>
+                <p class="muted">Tạo mới, cập nhật, báo hỏng và điều chuyển thiết bị.</p>
+              </div>
+              <button class="primary" id="addDevice">+ Thêm thiết bị</button>
+            </div>
+            <div class="table">
+              <div class="table-row header">
+                <span>Mã</span>
+                <span>Tên thiết bị</span>
+                <span>Phòng/Đơn vị</span>
+                <span>Trạng thái</span>
+                <span>Hành động</span>
+              </div>
+              <div class="table-row">
+                <span>LAB-122</span>
+                <span>Máy tính Dell Optiplex</span>
+                <span>Phòng Tin 2</span>
+                <span class="badge warning">Báo hỏng</span>
+                <span>
+                  <button class="ghost">Cập nhật</button>
+                  <button class="ghost">Sửa</button>
+                </span>
+              </div>
+              <div class="table-row">
+                <span>PJS-008</span>
+                <span>Máy chiếu Epson</span>
+                <span>Lớp 12A1</span>
+                <span class="badge success">Hoạt động</span>
+                <span>
+                  <button class="ghost">Cập nhật</button>
+                  <button class="ghost">Sửa</button>
+                </span>
+              </div>
+              <div class="table-row">
+                <span>AUD-054</span>
+                <span>Loa hội trường</span>
+                <span>Hội trường</span>
+                <span class="badge info">Đang sửa</span>
+                <span>
+                  <button class="ghost">Cập nhật</button>
+                  <button class="ghost">Sửa</button>
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <section class="tab" id="reports">
+            <div class="section-header">
+              <div>
+                <h2>Quy trình báo hỏng</h2>
+                <p class="muted">Theo dõi phê duyệt và trạng thái xử lý.</p>
+              </div>
+              <button class="secondary">Tạo báo hỏng</button>
+            </div>
+            <div class="card">
+              <div class="workflow">
+                <div>
+                  <h4>1. Người sử dụng</h4>
+                  <p>Ghi nhận tình trạng, đính kèm ảnh và mô tả.</p>
+                </div>
+                <div>
+                  <h4>2. Manager</h4>
+                  <p>Phê duyệt báo hỏng, đề xuất sửa chữa hoặc điều chuyển.</p>
+                </div>
+                <div>
+                  <h4>3. Admin</h4>
+                  <p>Cập nhật dữ liệu, cấu hình form và phân quyền.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="tab" id="users">
+            <div class="section-header">
+              <div>
+                <h2>Quản lý người dùng</h2>
+                <p class="muted">Phân quyền theo vai trò và đơn vị quản lý.</p>
+              </div>
+              <button class="primary">+ Tạo tài khoản</button>
+            </div>
+            <div class="card">
+              <div class="user-grid">
+                <div>
+                  <h4>Admin</h4>
+                  <p>Tạo form, cấu hình dữ liệu, quản lý phân quyền.</p>
+                </div>
+                <div>
+                  <h4>Manager</h4>
+                  <p>Phê duyệt báo hỏng, điều chuyển thiết bị.</p>
+                </div>
+                <div>
+                  <h4>Người sử dụng</h4>
+                  <p>Chỉ cập nhật thiết bị được phân công.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="tab" id="settings">
+            <div class="section-header">
+              <div>
+                <h2>Cấu hình form & dữ liệu</h2>
+                <p class="muted">Tùy chỉnh trường dữ liệu, liên kết Google Sheets.</p>
+              </div>
+              <button class="secondary">Lưu cấu hình</button>
+            </div>
+            <div class="card">
+              <div class="config-grid">
+                <div>
+                  <h4>Sheets kết nối</h4>
+                  <p>users, data, config</p>
+                  <span class="badge info">Google Apps Script</span>
+                </div>
+                <div>
+                  <h4>Thuộc tính form</h4>
+                  <p>Loại thiết bị, trạng thái, đơn vị sử dụng.</p>
+                </div>
+                <div>
+                  <h4>Quy tắc QR</h4>
+                  <p>Tự sinh QR khi tạo thiết bị mới, in nhanh.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal hidden" id="forgotModal">
+    <div class="modal-content">
+      <h3>Khôi phục mật khẩu</h3>
+      <p>Nhập email để nhận hướng dẫn khôi phục mật khẩu.</p>
+      <input type="email" placeholder="name@school.edu" />
+      <div class="modal-actions">
+        <button class="secondary" id="closeModal">Hủy</button>
+        <button class="primary">Gửi email</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
