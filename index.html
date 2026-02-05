@@ -268,10 +268,11 @@
     <div class="modal-content">
       <h3>Khôi phục mật khẩu</h3>
       <p>Nhập email để nhận hướng dẫn khôi phục mật khẩu.</p>
-      <input type="email" placeholder="name@school.edu" />
+      <input type="email" id="forgotEmail" placeholder="name@school.edu" />
+      <p id="forgotStatus" class="muted"></p>
       <div class="modal-actions">
-        <button class="secondary" id="closeModal">Hủy</button>
-        <button class="primary">Gửi email</button>
+        <button class="secondary" id="closeModal" type="button">Hủy</button>
+        <button class="primary" id="sendResetBtn" type="button">Gửi email</button>
       </div>
     </div>
   </div>
