@@ -1,3 +1,5 @@
+const API_BASE_URL = "Rhttps://script.google.com/macros/s/AKfycbysVUoCaCqREw1GSvvSwuyE1unw6btxgMa9ooII2Jv4vqX6IuLoXP3GaJZ7u1XqMQax/exec";
+
 const loginSection = document.getElementById("loginSection");
 const dashboardSection = document.getElementById("dashboardSection");
 const loginForm = document.getElementById("loginForm");
@@ -9,12 +11,9 @@ const switchTheme = document.getElementById("switchTheme");
 const profileName = document.getElementById("profileName");
 const profileRole = document.getElementById("profileRole");
 const qrPreview = document.getElementById("qrPreview");
+const devicesTable = document.querySelector("#devices .table");
 
-const users = [
-  { email: "admin@school.edu", password: "Admin123", role: "Admin", name: "Nguyễn Văn A" },
-  { email: "manager@school.edu", password: "Manager123", role: "Manager", name: "Trần Thị B" },
-  { email: "user@school.edu", password: "User123", role: "Người sử dụng", name: "Lê Văn C" },
-];
+let cachedDevices = [];
 
 const storage = {
   get(key) {
@@ -26,6 +25,32 @@ const storage = {
   remove(key) {
     localStorage.removeItem(key);
   },
+};
+
+const apiUrl = (path) => `${API_BASE_URL}?path=${encodeURIComponent(path)}`;
+
+const apiRequest = async (path, options = {}) => {
+  if (!API_BASE_URL || API_BASE_URL.includes("REPLACE_WITH")) {
+    throw new Error("Vui lòng cập nhật API_BASE_URL trong app.js");
+  }
+  const session = storage.get("session");
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+  };
+  if (session?.token) {
+    headers.Authorization = `Bearer ${session.token}`;
+  }
+
+  const response = await fetch(apiUrl(path), {
+    ...options,
+    headers,
+  });
+  const data = await response.json();
+  if (!response.ok || !data.ok) {
+    throw new Error(data.error || "Có lỗi xảy ra, vui lòng thử lại");
+  }
+  return data.data;
 };
 
 const login = (user, remember) => {
@@ -44,14 +69,7 @@ const renderSession = () => {
     profileName.textContent = session.name;
     profileRole.textContent = session.role;
     updateRoleUI(session.role);
-    if (qrPreview) {
-      qrPreview.innerHTML = "";
-      new QRCode(qrPreview, {
-        text: `QLCSVC|${session.role}|LAB-122`,
-        width: 120,
-        height: 120,
-      });
-    }
+    refreshDevices();
     return;
   }
   loginSection.classList.remove("hidden");
@@ -71,23 +89,90 @@ const updateRoleUI = (role) => {
   });
 };
 
-loginForm.addEventListener("submit", (event) => {
+const renderDevices = (devices) => {
+  if (!devicesTable) {
+    return;
+  }
+  const rows = devicesTable.querySelectorAll(".table-row");
+  rows.forEach((row, index) => {
+    if (index !== 0) {
+      row.remove();
+    }
+  });
+
+  devices.forEach((device) => {
+    const row = document.createElement("div");
+    row.className = "table-row";
+    row.innerHTML = `
+      <span>${device.code || ""}</span>
+      <span>${device.name || ""}</span>
+      <span>${device.location || ""}</span>
+      <span class="badge ${statusBadgeClass_(device.status)}">${device.status || ""}</span>
+      <span>
+        <button class="ghost" data-id="${device.id}">Cập nhật</button>
+        <button class="ghost" data-id="${device.id}">Sửa</button>
+      </span>
+    `;
+    devicesTable.appendChild(row);
+  });
+
+  updateQrPreview(devices[0]);
+};
+
+const statusBadgeClass_ = (status) => {
+  const value = String(status || "").toLowerCase();
+  if (value.includes("hỏng")) return "warning";
+  if (value.includes("sửa")) return "info";
+  return "success";
+};
+
+const updateQrPreview = (device) => {
+  if (!qrPreview) {
+    return;
+  }
+  qrPreview.innerHTML = "";
+  if (!device) {
+    return;
+  }
+  const qrText = device.qr_link || `${window.location.origin}?device=${device.id}`;
+  new QRCode(qrPreview, {
+    text: qrText,
+    width: 120,
+    height: 120,
+  });
+};
+
+const refreshDevices = async () => {
+  try {
+    const devices = await apiRequest("devices", { method: "GET" });
+    cachedDevices = devices;
+    renderDevices(devices);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
   const remember = document.getElementById("remember").checked;
   const savePassword = document.getElementById("savePassword").checked;
-  const user = users.find((item) => item.email === email && item.password === password);
 
-  if (user) {
+  try {
+    const data = await apiRequest("login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+
     if (savePassword) {
       storage.set("savedCredentials", { email, password });
     } else {
       storage.remove("savedCredentials");
     }
-    login(user, remember);
-  } else {
-    alert("Sai thông tin đăng nhập. Vui lòng thử lại.");
+    login(data, remember);
+  } catch (error) {
+    alert(error.message);
   }
 });
 
