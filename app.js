@@ -1,4 +1,4 @@
-const API_BASE_URL = "Rhttps://script.google.com/macros/s/AKfycbysVUoCaCqREw1GSvvSwuyE1unw6btxgMa9ooII2Jv4vqX6IuLoXP3GaJZ7u1XqMQax/exec";
+const API_BASE_URL = "https://script.google.com/macros/s/AKfycbysVUoCaCqREw1GSvvSwuyE1unw6btxgMa9ooII2Jv4vqX6IuLoXP3GaJZ7u1XqMQax/exec";
 
 const loginSection = document.getElementById("loginSection");
 const dashboardSection = document.getElementById("dashboardSection");
@@ -27,7 +27,13 @@ const storage = {
   },
 };
 
-const apiUrl = (path) => `${API_BASE_URL}?path=${encodeURIComponent(path)}`;
+const apiUrl = (path, token) => {
+  const params = new URLSearchParams({ path });
+  if (token) {
+    params.set("token", token);
+  }
+  return `${API_BASE_URL}?${params.toString()}`;
+};
 
 const apiRequest = async (path, options = {}) => {
   if (!API_BASE_URL || API_BASE_URL.includes("REPLACE_WITH")) {
@@ -35,14 +41,11 @@ const apiRequest = async (path, options = {}) => {
   }
   const session = storage.get("session");
   const headers = {
-    "Content-Type": "application/json",
+    "Content-Type": "text/plain;charset=utf-8",
     ...(options.headers || {}),
   };
-  if (session?.token) {
-    headers.Authorization = `Bearer ${session.token}`;
-  }
 
-  const response = await fetch(apiUrl(path), {
+  const response = await fetch(apiUrl(path, session?.token), {
     ...options,
     headers,
   });
