@@ -179,12 +179,26 @@ loginForm.addEventListener("submit", async (event) => {
   }
 });
 
+const hideForgotModal = () => {
+  forgotModal.classList.add("hidden");
+};
+
 forgotBtn.addEventListener("click", () => {
   forgotModal.classList.remove("hidden");
 });
 
-closeModal.addEventListener("click", () => {
-  forgotModal.classList.add("hidden");
+closeModal.addEventListener("click", hideForgotModal);
+
+forgotModal.addEventListener("click", (event) => {
+  if (event.target === forgotModal) {
+    hideForgotModal();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    hideForgotModal();
+  }
 });
 
 logoutBtn.addEventListener("click", () => {
