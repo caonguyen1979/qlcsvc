@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://script.google.com/macros/s/AKfycbysVUoCaCqREw1GSvvSwuyE1unw6btxgMa9ooII2Jv4vqX6IuLoXP3GaJZ7u1XqMQax/exec";
+const API_BASE_URL = "https://script.google.com/macros/s/AKfycby688jfgjjTwV7oc3Ihh12azlBiPaj9-g11u_h_X-dBnDjYVjb6hkXXrogtWGGR1g14/exec";
 
 const loginSection = document.getElementById("loginSection");
 const dashboardSection = document.getElementById("dashboardSection");
@@ -6,6 +6,9 @@ const loginForm = document.getElementById("loginForm");
 const forgotBtn = document.getElementById("forgotBtn");
 const forgotModal = document.getElementById("forgotModal");
 const closeModal = document.getElementById("closeModal");
+const sendResetBtn = document.getElementById("sendResetBtn");
+const forgotEmail = document.getElementById("forgotEmail");
+const forgotStatus = document.getElementById("forgotStatus");
 const logoutBtn = document.getElementById("logoutBtn");
 const switchTheme = document.getElementById("switchTheme");
 const profileName = document.getElementById("profileName");
@@ -181,6 +184,7 @@ loginForm.addEventListener("submit", async (event) => {
 
 const hideForgotModal = () => {
   forgotModal.classList.add("hidden");
+  forgotStatus.textContent = "";
 };
 
 forgotBtn.addEventListener("click", () => {
@@ -188,6 +192,33 @@ forgotBtn.addEventListener("click", () => {
 });
 
 closeModal.addEventListener("click", hideForgotModal);
+
+
+const submitForgotPassword = async () => {
+  const email = forgotEmail.value.trim();
+  if (!email) {
+    forgotStatus.textContent = "Vui lòng nhập email cần khôi phục.";
+    return;
+  }
+
+  sendResetBtn.disabled = true;
+  forgotStatus.textContent = "Đang gửi yêu cầu...";
+
+  try {
+    const result = await apiRequest("forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+
+    forgotStatus.textContent = result.message || "Đã gửi email khôi phục nếu tài khoản tồn tại.";
+  } catch (error) {
+    forgotStatus.textContent = error.message;
+  } finally {
+    sendResetBtn.disabled = false;
+  }
+};
+
+sendResetBtn.addEventListener("click", submitForgotPassword);
 
 forgotModal.addEventListener("click", (event) => {
   if (event.target === forgotModal) {
